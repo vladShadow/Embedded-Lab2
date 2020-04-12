@@ -1,5 +1,6 @@
 package com.example.lab2;
 
+import android.graphics.Color;
 import android.os.Bundle;
 import androidx.appcompat.app.AppCompatActivity;
 import com.jjoe64.graphview.GraphView;
@@ -19,6 +20,8 @@ public class MainActivity extends AppCompatActivity {
     private double notRealKoef;
     private double notRealKoef1;
     private double notRealKoef2;
+    private Double[][] cosMemo = new Double[N][N];
+    private Double[][] sinMemo = new Double[N][N];
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -28,8 +31,10 @@ public class MainActivity extends AppCompatActivity {
         LineGraphSeries<DataPoint> line1 = new LineGraphSeries<>(generateRandomSignal(signal));
 
         LineGraphSeries<DataPoint> line2 = new LineGraphSeries<>(calculateFourie());
+        line2.setColor(Color.GREEN);
 
         LineGraphSeries<DataPoint> line3 = new LineGraphSeries<>(calculateFastFourie());
+        line3.setColor(Color.RED);
 
         GraphView graph = findViewById(R.id.graph1);
         setUpGraph(graph, line1, -5, 6);
@@ -77,8 +82,14 @@ public class MainActivity extends AppCompatActivity {
             realKoef = 0;
             notRealKoef = 0;
             for (int j = 0; j < N - 1; j++) {
-                realKoef += signal[j] * Math.cos(2 * Math.PI * i * j / N);
-                notRealKoef -= signal[j] * Math.sin(2 * Math.PI * i * j / N);
+                if (cosMemo[i][j] == null) {
+                    cosMemo[i][j] = Math.cos(2 * Math.PI * i * j / N);
+                }
+                if (sinMemo[i][j] == null) {
+                    sinMemo[i][j] = Math.sin(2 * Math.PI * i * j / N);
+                }
+                realKoef += signal[j] * cosMemo[i][j];
+                notRealKoef -= signal[j] * sinMemo[i][j];
             }
             points[i] = new DataPoint(i, Math.sqrt(Math.pow(realKoef, 2) + Math.pow(notRealKoef, 2)));
         }
